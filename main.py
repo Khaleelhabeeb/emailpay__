@@ -9,10 +9,10 @@ from flask import (
     jsonify,
 )
 from flask_mysqldb import MySQL
-
+from datetime import timedelta, datetime
 
 app = Flask(__name__)
-app.secret_key = "ugretfreddfljhncbbbccyy###@dddddaddcccs"
+app.secret_key = "hffgvsflagfvhabshvbayrvbsdsaucdsfyryyvfdyuvcsdbsdcbyubvyraavbefa"
 
 # MySQL configuration
 app.config[
@@ -23,6 +23,7 @@ app.config[
     "MYSQL_PASSWORD"
 ] = ""  # Replace with your MySQL password
 app.config["MYSQL_DB"] = "emailpay"  # Replace with your database name
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
 
 mysql = MySQL(app)
 
@@ -48,10 +49,10 @@ def index():
 # testing my sql connection
 @app.route("/test_mysql")
 def test_mysql_connection():
-    cur = mysql.connection.cursor()
-    cur.execute("SELECT 1")
-    result = cur.fetchone()
-    cur.close()
+    with mysql.connection.cursor() as cur:
+        cur.execute("SELECT 1")
+        result = cur.fetchone()
+
     return f"MySQL Connection Test: {result[0]}"
 
 
@@ -101,6 +102,18 @@ def dashboard():
     else:
         flash("Please log in to access the dashboard.", "warning")
         return redirect(url_for("login"))
+    
+# Custom middleware to update session's last activity timestamp
+@app.before_request
+def update_session_timeout():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(minutes=20)  # Set session timeout to 20 minutes
+    session.modified = True
+    if "last_activity" in session:
+        # Check if the session has expired
+        if (datetime.now() - session["last_activity"]).total_seconds() > app.config["PERMANENT_SESSION_LIFETIME"].seconds:
+            session.clear()  # Clear the session data if the session has expired
+    session["last_activity"] = datetime.now()  # Update last activity timestamp
 
 
 @app.route("/send_money", methods=["POST"])
@@ -116,6 +129,11 @@ def transaction_success_route():
 
     return transaction_success()
 
+@app.route("/settings")
+def settings():
+    username = session["username"]
+    return render_template("settings.html", username=username)
+
 
 @app.route("/logout")
 def logout():
@@ -127,3 +145,4 @@ def logout():
 if __name__ == "__main__":
     app.debug = True
     app.run()
+

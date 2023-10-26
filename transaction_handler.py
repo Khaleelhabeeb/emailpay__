@@ -27,74 +27,72 @@ def send_money():
 
         if user_id:
             try:
-                cur = mysql.connection.cursor()
+                with mysql.connection.cursor() as cur:
 
-                # Get sender's balance and check if it's greater than or equal to the amount to be sent
-                cur.execute("SELECT balance FROM users WHERE id = %s", (user_id,))
-                sender_balance = Decimal(cur.fetchone()[0])
+                    # Get sender's balance and check if it's greater than or equal to the amount to be sent
+                    cur.execute("SELECT balance FROM users WHERE id = %s", (user_id,))
+                    sender_balance = Decimal(cur.fetchone()[0])
 
-                if sender_balance >= amount:
-                    # Deduct the amount from sender's balance
-                    new_balance_sender = sender_balance - amount
-                    cur.execute(
-                        "UPDATE users SET balance = %s WHERE id = %s",
-                        (new_balance_sender, user_id),
-                    )
-
-                    # Find recipient by email
-                    cur.execute(
-                        "SELECT id, balance FROM users WHERE email = %s",
-                        (recipient_email,),
-                    )
-                    recipient_data = cur.fetchone()
-
-                    if recipient_data:
-                        recipient_id, recipient_balance = recipient_data
-
-                        # Add the amount to recipient's balance
-                        new_balance_recipient = Decimal(recipient_balance) + amount
+                    if sender_balance >= amount:
+                        # Deduct the amount from sender's balance
+                        new_balance_sender = sender_balance - amount
                         cur.execute(
                             "UPDATE users SET balance = %s WHERE id = %s",
-                            (new_balance_recipient, recipient_id),
+                            (new_balance_sender, user_id),
                         )
 
-                        # Update total_sent for the sender and total_received for the recipient
+                        # Find recipient by email
                         cur.execute(
-                            "UPDATE users SET total_sent = total_sent + %s WHERE id = %s",
-                            (amount, user_id),
+                            "SELECT id, balance FROM users WHERE email = %s",
+                            (recipient_email,),
                         )
-                        cur.execute(
-                            "UPDATE users SET total_received = total_received + %s WHERE id = %s",
-                            (amount, recipient_id),
-                        )
+                        recipient_data = cur.fetchone()
 
-                        current_date = datetime.now()
+                        if recipient_data:
+                            recipient_id, recipient_balance = recipient_data
 
-                        # Get sender's email from the session
-                        user_id = session.get("user_id")
-
-                        # Create a transaction record
-                        cur.execute(
-                            "INSERT INTO transactions (sender_id, recipient_id, amount) VALUES (%s, %s, %s)",
-                            (user_id, recipient_id, amount),
-                        )
-                        mysql.connection.commit()
-
-                        return redirect(
-                            url_for(
-                                "transaction_success_route",
-                                amount=amount,
-                                recipient_email=recipient_email,
-                                transaction_date=current_date,
-                                user_id=user_id,
+                            # Add the amount to recipient's balance
+                            new_balance_recipient = Decimal(recipient_balance) + amount
+                            cur.execute(
+                                "UPDATE users SET balance = %s WHERE id = %s",
+                                (new_balance_recipient, recipient_id),
                             )
-                        )
-                    else:
-                        flash("Recipient not found.", "danger")
-                else:
-                    flash("Insufficient balance.", "danger")
 
-                cur.close()
+                            # Update total_sent for the sender and total_received for the recipient
+                            cur.execute(
+                                "UPDATE users SET total_sent = total_sent + %s WHERE id = %s",
+                                (amount, user_id),
+                            )
+                            cur.execute(
+                                "UPDATE users SET total_received = total_received + %s WHERE id = %s",
+                                (amount, recipient_id),
+                            )
+
+                            current_date = datetime.now()
+
+                            # Get sender's email from the session
+                            user_id = session.get("user_id")
+
+                            # Create a transaction record
+                            cur.execute(
+                                "INSERT INTO transactions (sender_id, recipient_id, amount) VALUES (%s, %s, %s)",
+                                (user_id, recipient_id, amount),
+                            )
+                            mysql.connection.commit()
+
+                            return redirect(
+                                url_for(
+                                    "transaction_success_route",
+                                    amount=amount,
+                                    recipient_email=recipient_email,
+                                    transaction_date=current_date,
+                                    user_id=user_id,
+                                )
+                            )
+                        else:
+                            flash("Recipient not found.", "danger")
+                    else:
+                        flash("Insufficient balance.", "danger")
 
             except Exception as e:
                 # Handle database errors
@@ -111,15 +109,13 @@ def send_money():
 def transaction_success():
     amount = request.args.get("amount")
     recipient_email = request.args.get("recipient_email")
-    transaction_date = request.args.get("current_date")
+    transaction_date = request.args.get("transaction_date")
     user_id = request.args.get("user_id")
+
+    recipient_fullname = get_recipient_fullname_from_email(recipient_email)
+
     return render_template(
-        "transaction_success.html",
-        amount=amount,
-        recipient_email=recipient_email,
-        transaction_date=current_date,
-        user_id=user_id,
+    "transaction_success.html",
+    amount=amount,
+    recipient_fullname=recipient_fullname,
     )
-
-
-current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
