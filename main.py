@@ -8,21 +8,22 @@ from flask import (
     flash,
     jsonify,
 )
+import os
 from flask_mysqldb import MySQL
 from datetime import timedelta, datetime
+from dotenv import load_dotenv
 
 app = Flask(__name__)
-app.secret_key = "hffgvsflagfvhabshvbayrvbsdsaucdsfyryyvfdyuvcsdbsdcbyubvyraavbefa"
+
+app.secret_key = "**************************"
 
 # MySQL configuration
-app.config[
-    "MYSQL_HOST"
-] = "localhost"  # Replace with your MySQL host (e.g., 'localhost')
-app.config["MYSQL_USER"] = "root"  # Replace with your MySQL username
-app.config[
-    "MYSQL_PASSWORD"
-] = ""  # Replace with your MySQL password
-app.config["MYSQL_DB"] = "emailpay"  # Replace with your database name
+app.config['DB_USER'] = os.environ.get('DB_USER')
+app.config['DB_PASSWORD'] = os.environ.get('DB_PASSWORD')
+app.config['DB_PORT'] = os.environ.get('DB_PORT')
+app.config['DB_NAME'] = os.environ.get('DB_NAME')
+load_dotenv()
+
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
 
 mysql = MySQL(app)
@@ -143,6 +144,5 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.debug = True
-    app.run()
+    app.run(debug=True)
 
