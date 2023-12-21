@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emailpay</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css" integrity="sha512-HK5fgLBL+xu6dm/Ii3z4xhlSUyZgTT9tuc/hSrtw6uzJOvgRr2a9jyxxT1ely+B+xFAmJKVSTbpM/CuL7qxO8w==" crossorigin="anonymous" />
+    <script src="https://kit.fontawesome.com/02eeae6f51.js" crossorigin="anonymous"></script>
+    <script src="{{url_for('static', filename='/js/currency.js')}}"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='/css/dashboard.css')}}" />
+    <link rel="icon" type="image/x-icon" href="{{url_for('static', filename='/img/favicon.ico')}}"/>
+</head>
+
+<body>
+    <div id="flash-messages">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert">
+                        {{ message }}
+                        <span class="close-btn">&times;</span>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+    <div class="container px-5 py-4 my-5">
+        <div class="row">
+            <div class="ps-lg-5 ps-sm-4 py-4 pe-3 col-md-12 d-flex flex-row align-items-center font-16 purple-color-2">
+                <div class="logo me-auto"><div><img src="{{url_for('static', filename='./img/logo.png')}}" alt="Logo" /></div></div>
+               <!-- <i class="fas fa-search px-4"></i> -->
+                <i class="far fa-bell px-4 notification"></i>
+                <i class="fa-solid fa-gear" style="color: #FF8872;"></i>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2 d-flex flex-row flex-md-column align-items-center">
+                <div class="my-4 mx-sm-2 mx-2 mx-md-0 font-16 square orange-bg-color white-color round-corner-small d-flex flex-row justify-content-center align-items-center">
+                    <i class="fas fa-home " href="dashboard.html"></i>
+                </div>
+                <div class="my-4 mx-sm-2 mx-2 mx-md-0 font-16 square grey-border purple-color-2 round-corner-small d-flex flex-row justify-content-center align-items-center">
+                    <a href="{{ url_for('login_route') }}" style="color: #FF8872;">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </a>
+                </div>                
+                <div class="my-4 mx-sm-2 mx-2 mx-md-0 font-16 square grey-border purple-color-2 round-corner-small d-flex flex-row justify-content-center align-items-center">
+                    <i class="fa-solid fa-gear" style="color: #FF8872;"></i>
+                </div>
+                <div class="mt-auto ms-auto ms-sm-auto my-4 mx-sm-2 mx-2 mx-md-0 font-16 square purple-bg-color white-color round-corner-small d-flex flex-row justify-content-center align-items-center">
+                    <i class="fas fa-plus "></i>
+                </div>
+            </div>
+            <div class="col-md-10">
+                <div class="row">
+                    <div class="col-md-5 col-sm-6">
+                        <div class="p-4 d-flex flex-column purple-bg-color round-corner">
+                            <span class="text-uppercase font-10 weight-600 white-color-2">Balance Details</span>
+                            <span class="font-28 weight-700 white-color mt-4">${{ user.balance }}</span>
+                            <span class="font-12 weight-300 white-color-2">USD</span>
+                            <div class="d-flex flex-row justify-content-between mt-4">
+                                <div class="d-flex flex-column">
+                                    <span class="font-16 weight-600 white-color">{{ user.username }}</span>
+                                    <span class="font-12 weight-300 white-color-2">username</span>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <span class="font-16 weight-600 white-color">{{user.id}}</span>
+                                    <span class="font-12 weight-300 white-color-2">userID</span>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-row mt-4">
+                                <button class="flex-grow-1 me-1 py-2 text-uppercase font-12 weight-700 purple-color-2 grey-bg-color">Receive</button>
+                                <button class="flex-grow-1 ms-1 py-2 text-uppercase font-12 weight-700 white-color orange-bg-color" id="sendMoneyBtn" >Send</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="py-3">
+                            <span class="text-uppercase font-10 weight-600 grey-color-2">Transactions</span>
+                            <div class="d-flex flex-column round-corner grey-bg-color ps-4 py-3 mt-3 mb-4">
+                                <span class="font-30 purple-color-2">${{ user.total_sent }}</span>
+                                <span class="text-uppercase font-14 purple-color-2">Sent</span>
+                            </div>
+                            <div class="d-flex flex-column round-corner grey-bg-color ps-4 py-3 ">
+                                <span class="font-30 purple-color-2">${{ user.total_received }}</span>
+                                <span class="text-uppercase font-14 purple-color-2">Received</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="pt-3">
+                            <table class="table table-borderless">
+                                <thead>
+                                    <tr>
+                                        <th class="text-uppercase font-10 weight-600 grey-color-2">Live prices</th>
+                                        <th class="text-end text-uppercase font-10 weight-600 purple-color-2">View All</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex flex-row">
+                                                <div class="d-flex flex-row justify-content-center align-items-center square round-corner-small font-20 light-orange-bg-color orange-color">
+                                                    <i class="fa-solid fa-dollar-sign" style="color: #FF8872"></i>
+                                                </div>
+                                                <div class="d-flex flex-column ps-2">
+                                                    <span class="font-14 weight-700 purple-color-2">USD</span>
+                                                    <span class="font-10 weight-400 purple-color-2">Dollar</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td id="USD">
+                                            <div class="d-flex flex-column align-items-end">
+                                                <span class="font-14 weight-700 purple-color-2"></span>
+                                                <span class="font-10 weight-400 orange-color"></span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex flex-row ">
+                                                <div class="d-flex flex-row justify-content-center align-items-center square round-corner-small light-yellow-bg-color yellow-color font-20 ">
+                                                    <i class="fa-solid fa-euro-sign" style="color: #FF8872;"></i>
+                                                </div>
+                                                <div class="d-flex flex-column ps-2 ">
+                                                    <span class="font-14 weight-700 purple-color-2 ">EURO</span>
+                                                    <span class="font-10 weight-400 purple-color-2 ">euro</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td id="EUR">
+                                            <div class="d-flex flex-column align-items-end ">
+                                                <span class="font-14 weight-700 purple-color-2 "></span>
+                                                <span class="font-10 weight-400 purple-color-2 "></span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex flex-row ">
+                                                <div class="d-flex flex-row justify-content-center align-items-center square round-corner-small light-teal-bg-color teal-color font-20 ">
+                                                    <i class="fa-solid fa-sterling-sign" style="color: #0a56b9;"></i>
+                                                </div>
+                                                <div class="d-flex flex-column ps-2 ">
+                                                    <span class="font-14 weight-700 purple-color-2 ">POUND</span>
+                                                    <span class="font-10 weight-400 purple-color-2 ">sterling</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td id="GBP">
+                                            <div class="d-flex flex-column align-items-end ">
+                                                <span class="font-14 weight-700 purple-color-2 "></span>
+                                                <span class="font-10 weight-400 orange-color "></span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex flex-row ">
+                                                <div class="d-flex flex-row justify-content-center align-items-center square round-corner-small light-green-bg-color green-color font-20 ">
+                                                    <i class="fa-solid fa-naira-sign" style="color: #099f1b;"></i>
+                                                </div>
+                                                <div class="d-flex flex-column ps-2 ">
+                                                    <span class="font-14 weight-700 purple-color-2 ">NGN</span>
+                                                    <span class="font-10 weight-400 purple-color-2 ">Naira</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td id="NGN">
+                                            <div class="d-flex flex-column align-items-end ">
+                                                <span class="font-14 weight-700 purple-color-2 "></span>
+                                                <span class="font-10 weight-400 purple-color-2 "></span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-md-8">
+                        <div>
+                            <table class="table table-borderless">
+                                <thead>
+                                    <tr>
+                                        <th class="text-uppercase font-10 weight-600 grey-color-2">Transactions</th>
+                                        <th class="text-uppercase font-10 weight-600 purple-color-2 text-end">View All</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex flex-row">
+                                                <div class="d-flex flex-row justify-content-center align-items-center orange-color square round-corner-small light-orange-bg-color font-14">
+                                                    <i class="fas fa-long-arrow-alt-up"></i>
+                                                </div>
+                                                <div class="d-flex flex-column ps-2">
+                                                    <span class="font-14 weight-700 purple-color-2">Received userID</span>
+                                                    <span class="font-10 weight-400 purple-color-2">12 Nov, 2023</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column align-items-end">
+                                                <span class=" font-16 weight-700 orange-color ">+$100</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex flex-row ">
+                                                <div class="d-flex flex-row justify-content-center align-items-center square round-corner-small light-purple-bg-color purple-color-2 font-14 ">
+                                                    <i class="fas fa-long-arrow-alt-down "></i>
+                                                </div>
+                                                <div class="d-flex flex-column ps-2 ">
+                                                    <span class="font-14 weight-700 purple-color-2 ">Received USD</span>
+                                                    <span class="font-10 weight-400 purple-color-2 ">12 Nov, 2023</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column align-items-end ">
+                                                <span class="font-16 weight-700 purple-color-2 ">+$100</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex flex-row ">
+                                                <div class="d-flex flex-row justify-content-center align-items-center square round-corner-small light-orange-bg-color orange-color font-14 ">
+                                                    <i class="fas fa-long-arrow-alt-up "></i>
+                                                </div>
+                                                <div class="d-flex flex-column ps-2 ">
+                                                    <span class="font-14 weight-700 purple-color-2 ">Received USD</span>
+                                                    <span class="font-10 weight-400 purple-color-2 ">12 Nov, 2023</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column align-items-end ">
+                                                <span class="font-16 weight-700 orange-color ">+$100</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex flex-row justify-content-between mt-2">
+                            <span class="text-uppercase font-10 weight-600 grey-color-2">Security</span>
+                            <span class="text-uppercase font-10 weight-600 purple-color-2 text-end">View All</span>
+                        </div>
+                        <div class="d-flex flex-row justify-content-between align-items-center grey-border round-corner px-4 py-3 mt-3">
+                            <div>
+                                <span class="d-block font-16 weight-400 purple-color-2">Email notif</span>
+                                <span class="d-block font-10 weight-400 purple-color-2">Disable</span>
+                            </div>
+                            <div class="onoffwrapper">
+                                <input type="checkbox" name="toggle1" id="toggle1" class="onoff">
+                                <label for="toggle1"></label>
+                            </div>
+                        </div>
+                        <div class="d-flex flex-row justify-content-between align-items-center grey-border round-corner px-4 py-3 mt-3">
+                            <div>
+                                <span class="d-block font-16 weight-400 purple-color-2">Password</span>
+                                <span class="d-block font-10 weight-400 purple-color-2">Enable</span>
+                            </div>
+                            <div class="onoffwrapper">
+                                <input type="checkbox" name="toggle2" id="toggle2" class="onoff" checked>
+                                <label for="toggle2"></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<!-- Modal dialog for sending money -->
+<div id="sendMoneyModal" class="modal">
+    <div class="modal-content">
+        <h3>Send Money  <span class="close" id="closeSendMoneyModal">&times;</span></h3>
+        <form action="/send_money" method="POST">
+            <label for="recipientEmail">Recipient's Email:</label>
+            <input type="email" id="recipientEmail" name="recipient_email" required><br><br>
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" name="amount" min="0.01" step="0.01" required><br><br>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    var closeButtons = document.querySelectorAll('.close-btn');
+    var alerts = document.querySelectorAll('.alert');
+
+    closeButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+            // Find the parent alert div and remove it from the DOM
+            var alert = button.parentElement;
+            alert.remove();
+        });
+    });
+
+    // Function to remove alert after a specified duration (in milliseconds)
+    function removeAlert(alert) {
+        setTimeout(function() {
+            alert.remove();
+        }, 5000); // 5000 milliseconds = 5 seconds (adjust this value as needed)
+    }
+
+    // Automatically remove alerts after a specified duration
+    alerts.forEach(function(alert) {
+        removeAlert(alert);
+    });
+});
+
+</script>
+<script src="{{url_for('static', filename='/js/script.js')}}"> </script>
+</body>
+
+</html>

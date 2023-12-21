@@ -1,4 +1,4 @@
-from main import main, session
+from main import  session
 from flask import flash, redirect, url_for, session, request, render_template
 from main import mysql
 

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{{url_for('static', filename='/css/login.css')}}"/>
+</head>
+<body>
+    <div class="container">
+        <section class="wrapper">
+            <div class="heading">
+                <h1 class="text text-large">Sign In To EmailPay</h1>
+                <p class="text text-normal">New user? <span><a href="register" class="text text-links">Create an account</a></span></p>
+            </div>
+
+            <form method="POST" action="/login" class="form" onsubmit="loginUser(); return false;">
+                <div class="input-control">
+                    <input type="text" name="username" id="username" class="input-field" placeholder="Username" required>
+                </div>
+                <div class="input-control">
+                    <input type="password" name="password" id="password" class="input-field" placeholder="Password" required>
+                </div>
+                <div class="input-control">
+                    <a href="" class="text text-links">Forgot Password</a>
+                    <input type="submit" class="input-submit" value="Sign In">
+                </div>
+            </form>
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    <ul class="flash-messages">
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+
+            <div class="striped">
+                <div class="striped-line"></div>
+                <div class="striped-text">Or</div>
+                <div class="striped-line"></div>
+            </div>
+
+            <div class="method">
+                <div class="method-control">
+                    <a href="#" class="method-action">
+                        <i class="fa-brands fa-google"></i>
+                        <span>Sign in with Google</span>
+                    </a>
+                </div>
+                <div class="method-control">
+                    <a href="#" class="method-action">
+                        <i class="fa-brands fa-square-facebook"></i>
+                        <span>Sign in with Facebook</span>
+                    </a>
+                    
+                </div>
+                <div class="method-control">
+                    <a href="#" class="method-action">
+                        <i class="fa-brands fa-apple"></i>
+                        <span>Sign in with Apple</span>
+                    </a>
+                    
+                </div>
+            </div>
+
+        </section>
+    </div>
+    <!-- Loader -->
+    <div id="loader" class="loader"></div>
+
+    <script src="{{url_for('static', filename='/js/loader.js')}}"></script>
+</body>
+</html>
