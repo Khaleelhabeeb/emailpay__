@@ -106,15 +106,15 @@ def dashboard():
     
 # Custom middleware to update session's last activity timestamp
 @app.before_request
-def update_session_timeout():
+def before_request():
     session.permanent = True
-    app.permanent_session_lifetime = timedelta(minutes=20)  # Set session timeout to 20 minutes
-    session.modified = True
     if "last_activity" in session:
         # Check if the session has expired
-        if (datetime.now() - session["last_activity"]).total_seconds() > app.config["PERMANENT_SESSION_LIFETIME"].seconds:
-            session.clear()  # Clear the session data if the session has expired
-    session["last_activity"] = datetime.now()  # Update last activity timestamp
+        now = datetime.now()
+        last_activity = session["last_activity"].replace(tzinfo=None)  # Convert to naive datetime
+        if (now - last_activity).total_seconds() > app.permanent_session_lifetime.total_seconds():
+            session.clear()  
+    session["last_activity"] = datetime.now()
 
 
 @app.route("/send_money", methods=["POST"])
