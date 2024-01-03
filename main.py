@@ -20,13 +20,13 @@ app.secret_key = "**************************"
 # MySQL configuration
 app.config['DB_USER'] = os.environ.get('DB_USER')
 app.config['DB_PASSWORD'] = os.environ.get('DB_PASSWORD')
-app.config['DB_PORT'] = os.environ.get('DB_PORT')
+app.config['DB_HOST'] = os.environ.get('DB_HOST')
 app.config['DB_NAME'] = os.environ.get('DB_NAME')
 load_dotenv()
 
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
-
 mysql = MySQL(app)
+
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
 
 
 class UserProfile:
@@ -144,5 +144,5 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
 
