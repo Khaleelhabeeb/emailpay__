@@ -29,7 +29,7 @@ def send_money():
             try:
                 with mysql.connection.cursor() as cur:
 
-                    # Get sender's balance and check if it's greater than or equal to the amount to be sent
+                    # Get senders balance and check if it's greater than or equal to the amount to be sent
                     cur.execute("SELECT balance FROM users WHERE id = %s", (user_id,))
                     sender_balance = Decimal(cur.fetchone()[0])
 
