@@ -1,12 +1,10 @@
 from flask import (
     Flask,
     render_template,
-    request,
     redirect,
     session,
     url_for,
     flash,
-    jsonify,
 )
 import os
 from flask_mysqldb import MySQL
@@ -47,7 +45,6 @@ def index():
     return render_template("index.html")
 
 
-# testing my sql connection
 @app.route("/test_mysql")
 def test_mysql_connection():
     with mysql.connection.cursor() as cur:
