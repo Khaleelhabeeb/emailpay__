@@ -28,9 +28,9 @@ def send_money():
         if user_id:
             try:
                 with mysql.connection.cursor() as cur:
+                    mysql.connection.begin()
 
-                    # Get senders balance and check if it's greater than or equal to the amount to be sent
-                    cur.execute("SELECT balance FROM users WHERE id = %s", (user_id,))
+                    cur.execute("SELECT balance FROM users WHERE id = %s FOR UPDATE", (user_id,))
                     sender_balance = Decimal(cur.fetchone()[0])
 
                     if sender_balance >= amount:
@@ -43,7 +43,7 @@ def send_money():
 
                         # Find recipient by email
                         cur.execute(
-                            "SELECT id, balance FROM users WHERE email = %s",
+                            "SELECT id, balance FROM users WHERE email = %s FOR UPDATE",
                             (recipient_email,),
                         )
                         recipient_data = cur.fetchone()
@@ -70,14 +70,12 @@ def send_money():
 
                             current_date = datetime.now()
 
-                            # Get sender's email from the session
-                            user_id = session.get("user_id")
-
                             # Create a transaction record
                             cur.execute(
                                 "INSERT INTO transactions (sender_id, recipient_id, amount) VALUES (%s, %s, %s)",
                                 (user_id, recipient_id, amount),
                             )
+
                             mysql.connection.commit()
 
                             return redirect(
@@ -95,7 +93,8 @@ def send_money():
                         flash("Insufficient balance.", "danger")
 
             except Exception as e:
-                # Handle database errors
+                # Rollback the transaction if any error occurs
+                mysql.connection.rollback()
                 print("Error:", str(e))
                 flash("Error processing the transaction.", "danger")
         else:
@@ -104,7 +103,6 @@ def send_money():
         flash("Please log in to send money.", "warning")
 
     return redirect(url_for("dashboard"))
-
 
 def transaction_success():
     amount = request.args.get("amount")
