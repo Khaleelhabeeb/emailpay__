@@ -117,3 +117,5 @@ def transaction_success():
     amount=amount,
     recipient_fullname=recipient_fullname,
     )
+
+current_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S") 
