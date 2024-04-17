@@ -7,9 +7,9 @@ from flask import (
     flash,
 )
 import os
-from flask_mysqldb import MySQL
 from datetime import timedelta, datetime
 from dotenv import load_dotenv
+from flask_mysqldb import MySQL
 
 app = Flask(__name__)
 
